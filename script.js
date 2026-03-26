@@ -1,20 +1,29 @@
-const API_ENDPOINT = 'https://raw1-journel.netlify.app/.netlify/functions/submit-form';
-const TRACKING_ENDPOINT = 'https://raw1-journel.netlify.app/.netlify/functions/submit-form';
-const urlToken = new URLSearchParams(window.location.search).get('token');
+import { loadFormByToken, submitForm, uploadAttachment } from './src/services/formService.js';
 
-/* ── Default date to today ─────────────────────────────────── */
+const urlToken = new URLSearchParams(window.location.search).get('token');
+let status = 'loading';
+let errorMsg = '';
+
+const form        = document.getElementById('feedback-form');
+const formCard    = document.getElementById('form-card');
+const successCard = document.getElementById('success-card');
+const submitBtn   = document.getElementById('submit-btn');
+const btnLabel    = submitBtn.querySelector('.btn-label');
+
+const statusBanner = createStatusBanner();
+
 document.getElementById('feedbackDate').value = new Date().toISOString().slice(0, 10);
 
 /* ── Pill buttons (gender, age, demoProject, purchaseIntent) ── */
 document.querySelectorAll('.pill-group').forEach((group) => {
-  const field     = group.dataset.field;
-  const hidden    = document.getElementById(field);
-  const pills     = group.querySelectorAll('.pill');
+  const field  = group.dataset.field;
+  const hidden = document.getElementById(field);
+  const pills  = group.querySelectorAll('.pill');
 
   pills.forEach((pill) => {
     pill.addEventListener('click', () => {
-      const val       = pill.dataset.value;
-      const isActive  = pill.classList.contains('active');
+      const val      = pill.dataset.value;
+      const isActive = pill.classList.contains('active');
 
       // deselect all, then select clicked (toggle off if same)
       pills.forEach((p) => p.classList.remove('active'));
@@ -51,25 +60,25 @@ function updatePurchaseReason(intent) {
   }
 }
 
-/* ── Star rating ───────────────────────────────────────────── */
-const stars      = document.querySelectorAll('.star');
+/* ── Star rating ────────────────────────────────────────────── */
+const stars        = document.querySelectorAll('.star');
 const ratingHidden = document.getElementById('rating');
 let currentRating  = 0;
 
 function paintStars(upTo) {
   stars.forEach((s) => {
-    const v = parseInt(s.dataset.value);
+    const v = parseInt(s.dataset.value, 10);
     s.classList.toggle('selected', v <= upTo);
     s.classList.remove('hovered');
   });
 }
 
 stars.forEach((star) => {
-  const val = parseInt(star.dataset.value);
+  const val = parseInt(star.dataset.value, 10);
 
   star.addEventListener('mouseenter', () => {
     stars.forEach((s) => {
-      s.classList.toggle('hovered', parseInt(s.dataset.value) <= val);
+      s.classList.toggle('hovered', parseInt(s.dataset.value, 10) <= val);
       s.classList.remove('selected');
     });
   });
@@ -86,26 +95,25 @@ stars.forEach((star) => {
   });
 });
 
-/* ── Excitement emoji buttons ──────────────────────────────── */
-const emojiBtns       = document.querySelectorAll('.emoji-btn');
+/* ── Excitement emoji buttons ───────────────────────────────── */
+const emojiBtns        = document.querySelectorAll('.emoji-btn');
 const excitementHidden = document.getElementById('excitementLevel');
 let currentExcitement  = 5; // default matches app
 
-// paint default
 function paintEmoji(val) {
-  emojiBtns.forEach((b) => b.classList.toggle('active', parseInt(b.dataset.value) === val));
+  emojiBtns.forEach((b) => b.classList.toggle('active', parseInt(b.dataset.value, 10) === val));
 }
 paintEmoji(currentExcitement);
 
 emojiBtns.forEach((btn) => {
   btn.addEventListener('click', () => {
-    currentExcitement      = parseInt(btn.dataset.value);
+    currentExcitement      = parseInt(btn.dataset.value, 10);
     excitementHidden.value = currentExcitement;
     paintEmoji(currentExcitement);
   });
 });
 
-/* ── Validation ────────────────────────────────────────────── */
+/* ── Validation ─────────────────────────────────────────────── */
 function validateForm() {
   const name = document.getElementById('personName').value.trim();
   const ok   = name.length > 0;
@@ -117,70 +125,48 @@ document.getElementById('personName').addEventListener('input', () => {
   document.getElementById('field-personName').classList.remove('invalid');
 });
 
-/* ── Submit ────────────────────────────────────────────────── */
-const form        = document.getElementById('feedback-form');
-const formCard    = document.getElementById('form-card');
-const successCard = document.getElementById('success-card');
-const submitBtn   = document.getElementById('submit-btn');
-const btnLabel    = submitBtn.querySelector('.btn-label');
-
+/* ── Submit ─────────────────────────────────────────────────── */
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
+
+  if (status !== 'ready') return;
 
   if (!validateForm()) {
     document.getElementById('field-personName').scrollIntoView({ behavior: 'smooth', block: 'center' });
     return;
   }
 
-  const payload = {
-    personName:        document.getElementById('personName').value.trim(),
-    feedbackDate:      document.getElementById('feedbackDate').value,
-    gender:            document.getElementById('gender').value,
-    age:               document.getElementById('age').value,
-    demoProject:       document.getElementById('demoProject').value,
-    purchaseIntent:    document.getElementById('purchaseIntent').value,
-    purchaseReason:    document.getElementById('purchaseReason').value.trim(),
-    rating:            parseInt(document.getElementById('rating').value) || 0,
-    featuresLiked:     document.getElementById('featuresLiked').value.trim(),
-    featuresDisliked:  document.getElementById('featuresDisliked').value.trim(),
-    changesRecommended:document.getElementById('changesRecommended').value.trim(),
-    phoneNumber:       document.getElementById('phoneNumber').value.trim(),
-    email:             document.getElementById('email').value.trim(),
-    excitementLevel:   parseInt(document.getElementById('excitementLevel').value) || 5,
-    submittedAt:       new Date().toISOString(),
-  };
+  const answers = buildAnswers();
 
-  submitBtn.disabled = true;
-  submitBtn.classList.add('loading');
-  btnLabel.textContent = 'Sending…';
-
-  // Fire token tracking POST (non-blocking — never delays or prevents success)
-  if (urlToken) {
-    fetch(TRACKING_ENDPOINT, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token: urlToken, answers: payload }),
-    }).catch(() => {}); // silently ignore errors
-  }
+  setStatus('submitting', 'Submitting your feedback...');
 
   try {
-    console.log('Posting to:', API_ENDPOINT);
-    console.log('Sending token:', urlToken);
-    const res = await fetch(API_ENDPOINT, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token: urlToken, answers: { ...payload } }),
-    });
-    console.log('Response status:', res.status);
-    const resBody = await res.text();
-    console.log('Response body:', resBody);
-    if (!res.ok) throw new Error(`${res.status}`);
-    showSuccess();
-  } catch {
-    // Placeholder endpoint — show success anyway; remove catch fallback once real API is connected
-    showSuccess();
+    await submitForm(urlToken, answers);
+    setStatus('submitted');
+  } catch (err) {
+    errorMsg = err?.message || 'Failed to submit form. Please try again.';
+    setStatus('error', errorMsg);
   }
 });
+
+function buildAnswers() {
+  return {
+    personName:         document.getElementById('personName').value.trim(),
+    feedbackDate:       document.getElementById('feedbackDate').value,
+    gender:             document.getElementById('gender').value,
+    age:                document.getElementById('age').value,
+    demoProject:        document.getElementById('demoProject').value,
+    purchaseIntent:     document.getElementById('purchaseIntent').value,
+    purchaseReason:     document.getElementById('purchaseReason').value.trim(),
+    rating:             parseInt(document.getElementById('rating').value, 10) || 0,
+    featuresLiked:      document.getElementById('featuresLiked').value.trim(),
+    featuresDisliked:   document.getElementById('featuresDisliked').value.trim(),
+    changesRecommended: document.getElementById('changesRecommended').value.trim(),
+    phoneNumber:        document.getElementById('phoneNumber').value.trim(),
+    email:              document.getElementById('email').value.trim(),
+    excitementLevel:    parseInt(document.getElementById('excitementLevel').value, 10) || 5,
+  };
+}
 
 function showSuccess() {
   formCard.style.display = 'none';
@@ -188,7 +174,91 @@ function showSuccess() {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-/* ── Reset ─────────────────────────────────────────────────── */
+function createStatusBanner() {
+  const banner = document.createElement('div');
+  banner.id = 'status-banner';
+  banner.style.textAlign = 'center';
+  banner.style.margin = '12px 0';
+  banner.style.fontWeight = '600';
+  banner.style.color = '#475569';
+  banner.classList.add('hidden');
+  document.querySelector('.page').insertBefore(banner, formCard);
+  return banner;
+}
+
+function setStatus(nextStatus, message = '') {
+  status = nextStatus;
+  errorMsg = message;
+
+  if (message) {
+    statusBanner.textContent = message;
+    statusBanner.classList.remove('hidden');
+    statusBanner.style.color = nextStatus === 'error' ? '#b91c1c' : '#475569';
+  } else {
+    statusBanner.textContent = '';
+    statusBanner.classList.add('hidden');
+  }
+
+  if (nextStatus === 'loading') {
+    submitBtn.disabled = true;
+    submitBtn.classList.add('loading');
+    btnLabel.textContent = 'Loading...';
+  } else if (nextStatus === 'ready') {
+    submitBtn.disabled = false;
+    submitBtn.classList.remove('loading');
+    btnLabel.textContent = 'Submit Feedback';
+    formCard.style.display = '';
+  } else if (nextStatus === 'submitting') {
+    submitBtn.disabled = true;
+    submitBtn.classList.add('loading');
+    btnLabel.textContent = 'Sending…';
+  } else if (nextStatus === 'submitted') {
+    submitBtn.disabled = true;
+    submitBtn.classList.remove('loading');
+    btnLabel.textContent = 'Submit Feedback';
+    statusBanner.classList.add('hidden');
+    showSuccess();
+  } else if (nextStatus === 'error') {
+    submitBtn.disabled = true;
+    submitBtn.classList.remove('loading');
+    btnLabel.textContent = 'Submit Feedback';
+    formCard.style.display = 'none';
+    successCard.classList.remove('visible');
+  }
+}
+
+function prefillFromToken(data) {
+  if (!data) return;
+
+  if (data.person_name) {
+    document.getElementById('personName').value = data.person_name;
+  }
+  if (data.phone_number) {
+    document.getElementById('phoneNumber').value = data.phone_number;
+  }
+  if (data.email) {
+    document.getElementById('email').value = data.email;
+  }
+}
+
+async function initFormToken() {
+  setStatus('loading', 'Loading form...');
+
+  if (!urlToken) {
+    setStatus('error', 'No form token found in the URL.');
+    return;
+  }
+
+  try {
+    const data = await loadFormByToken(urlToken);
+    prefillFromToken(data);
+    setStatus('ready');
+  } catch (err) {
+    setStatus('error', err?.message || 'This form link is invalid or has expired.');
+  }
+}
+
+/* ── Reset ──────────────────────────────────────────────────── */
 document.getElementById('reset-btn').addEventListener('click', () => {
   form.reset();
 
@@ -207,11 +277,14 @@ document.getElementById('reset-btn').addEventListener('click', () => {
   updatePurchaseReason('');
 
   form.querySelectorAll('.field').forEach((f) => f.classList.remove('invalid'));
-  submitBtn.disabled = false;
+  submitBtn.disabled = status !== 'ready';
   submitBtn.classList.remove('loading');
   btnLabel.textContent = 'Submit Feedback';
 
   successCard.classList.remove('visible');
-  formCard.style.display = '';
+  formCard.style.display = status === 'error' ? 'none' : '';
   window.scrollTo({ top: 0, behavior: 'smooth' });
 });
+
+// Initialize
+initFormToken();

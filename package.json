@@ -1,0 +1,24 @@
+{
+  "name": "jornel-feedback-form",
+  "version": "1.0.0",
+  "description": "A standalone, mobile-first feedback form for the Jornel journal app. Pure HTML, CSS, and vanilla JS — no frameworks, no login required.",
+  "main": "script.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mohith7655/jornel-feedback-form.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/mohith7655/jornel-feedback-form/issues"
+  },
+  "homepage": "https://github.com/mohith7655/jornel-feedback-form#readme",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.100.1"
+  }
+}
