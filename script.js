@@ -1,8 +1,6 @@
 const API_ENDPOINT = 'https://raw1-journel.netlify.app/.netlify/functions/submit-form';
 const TRACKING_ENDPOINT = 'https://raw1-journel.netlify.app/.netlify/functions/submit-form';
-
-/* ── Token from URL ────────────────────────────────────────── */
-const urlToken = new URLSearchParams(window.location.search).get('token') || null;
+const urlToken = new URLSearchParams(window.location.search).get('token');
 
 /* ── Default date to today ─────────────────────────────────── */
 document.getElementById('feedbackDate').value = new Date().toISOString().slice(0, 10);
@@ -167,10 +165,11 @@ form.addEventListener('submit', async (e) => {
 
   try {
     console.log('Posting to:', API_ENDPOINT);
+    console.log('Sending token:', urlToken);
     const res = await fetch(API_ENDPOINT, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({ token: urlToken, answers: { ...payload } }),
     });
     console.log('Response status:', res.status);
     const resBody = await res.text();
