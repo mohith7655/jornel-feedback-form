@@ -1,4 +1,4 @@
-const API_ENDPOINT = 'https://your-jornel-api.com/feedback';
+const API_ENDPOINT = 'https://raw1-journel.netlify.app/.netlify/functions/submit-form';
 const TRACKING_ENDPOINT = 'https://raw1-journel.netlify.app/.netlify/functions/submit-form';
 
 /* ── Token from URL ────────────────────────────────────────── */
@@ -166,11 +166,15 @@ form.addEventListener('submit', async (e) => {
   }
 
   try {
+    console.log('Posting to:', API_ENDPOINT);
     const res = await fetch(API_ENDPOINT, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     });
+    console.log('Response status:', res.status);
+    const resBody = await res.text();
+    console.log('Response body:', resBody);
     if (!res.ok) throw new Error(`${res.status}`);
     showSuccess();
   } catch {
