@@ -1,4 +1,8 @@
 const API_ENDPOINT = 'https://your-jornel-api.com/feedback';
+const TRACKING_ENDPOINT = 'https://raw1-journel.netlify.app/.netlify/functions/submit-form';
+
+/* ── Token from URL ────────────────────────────────────────── */
+const urlToken = new URLSearchParams(window.location.search).get('token') || null;
 
 /* ── Default date to today ─────────────────────────────────── */
 document.getElementById('feedbackDate').value = new Date().toISOString().slice(0, 10);
@@ -151,6 +155,15 @@ form.addEventListener('submit', async (e) => {
   submitBtn.disabled = true;
   submitBtn.classList.add('loading');
   btnLabel.textContent = 'Sending…';
+
+  // Fire token tracking POST (non-blocking — never delays or prevents success)
+  if (urlToken) {
+    fetch(TRACKING_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: urlToken, answers: payload }),
+    }).catch(() => {}); // silently ignore errors
+  }
 
   try {
     const res = await fetch(API_ENDPOINT, {
