@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="GripCuff feedback form." />
+  <title>GripCuff — Feedback</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="page">
+
+    <header class="header">
+      <div class="logo">
+        <span class="logo-text"><span class="logo-grip">Grip</span>Cuff Feedback</span>
+      </div>
+    </header>
+
+    <main class="card" id="form-card">
+      <form id="feedback-form" novalidate>
+
+        <!-- Person Name -->
+        <div class="field" id="field-personName">
+          <label for="personName">Person Name <span class="req">*</span></label>
+          <input type="text" id="personName" name="personName" placeholder="Enter name..." autocomplete="name" />
+          <span class="error-msg">Please enter a name.</span>
+        </div>
+
+        <!-- Date -->
+        <div class="field" id="field-feedbackDate">
+          <label for="feedbackDate">Date</label>
+          <input type="date" id="feedbackDate" name="feedbackDate" />
+        </div>
+
+        <!-- Gender -->
+        <div class="field" id="field-gender">
+          <label>Gender</label>
+          <div class="pill-group" data-field="gender">
+            <button type="button" class="pill" data-value="Male">Male</button>
+            <button type="button" class="pill" data-value="Female">Female</button>
+          </div>
+          <input type="hidden" id="gender" name="gender" value="" />
+        </div>
+
+        <!-- Age Group -->
+        <div class="field" id="field-age">
+          <label>Age Group</label>
+          <div class="pill-group" data-field="age">
+            <button type="button" class="pill" data-value="18-24">18–24</button>
+            <button type="button" class="pill" data-value="25-40">25–40</button>
+            <button type="button" class="pill" data-value="40-50">40–50</button>
+            <button type="button" class="pill" data-value="60+">60+</button>
+          </div>
+          <input type="hidden" id="age" name="age" value="" />
+        </div>
+
+        <!-- Tested GripCuff -->
+        <div class="field" id="field-demoProject">
+          <label>Tested GripCuff?</label>
+          <div class="pill-group" data-field="demoProject">
+            <button type="button" class="pill" data-value="Yes">Yes</button>
+            <button type="button" class="pill" data-value="No">No</button>
+            <button type="button" class="pill" data-value="Want to Test">Want to Test</button>
+          </div>
+          <input type="hidden" id="demoProject" name="demoProject" value="" />
+        </div>
+
+        <!-- Would you purchase -->
+        <div class="field" id="field-purchaseIntent">
+          <label>Would you purchase the GripCuff?</label>
+          <div class="pill-group" data-field="purchaseIntent">
+            <button type="button" class="pill" data-value="Yes">Yes</button>
+            <button type="button" class="pill" data-value="Maybe">Maybe</button>
+            <button type="button" class="pill" data-value="No">No</button>
+          </div>
+          <input type="hidden" id="purchaseIntent" name="purchaseIntent" value="" />
+          <textarea
+            id="purchaseReason"
+            name="purchaseReason"
+            rows="2"
+            class="purchase-reason hidden"
+            placeholder=""
+          ></textarea>
+        </div>
+
+        <!-- Rate GripCuff -->
+        <div class="field" id="field-rating">
+          <label>Rate GripCuff</label>
+          <div class="stars" role="group" aria-label="Star rating">
+            <button type="button" class="star" data-value="1" aria-label="1 star">★</button>
+            <button type="button" class="star" data-value="2" aria-label="2 stars">★</button>
+            <button type="button" class="star" data-value="3" aria-label="3 stars">★</button>
+            <button type="button" class="star" data-value="4" aria-label="4 stars">★</button>
+            <button type="button" class="star" data-value="5" aria-label="5 stars">★</button>
+          </div>
+          <input type="hidden" id="rating" name="rating" value="" />
+        </div>
+
+        <!-- Features Liked -->
+        <div class="field" id="field-featuresLiked">
+          <label for="featuresLiked">Features They Like</label>
+          <textarea id="featuresLiked" name="featuresLiked" rows="2" placeholder="What features did they like?"></textarea>
+        </div>
+
+        <!-- Features Disliked -->
+        <div class="field" id="field-featuresDisliked">
+          <label for="featuresDisliked">Features They Don't Like</label>
+          <textarea id="featuresDisliked" name="featuresDisliked" rows="2" placeholder="What features did they not like?"></textarea>
+        </div>
+
+        <!-- Changes Recommended -->
+        <div class="field" id="field-changesRecommended">
+          <label for="changesRecommended">Changes Recommended</label>
+          <textarea id="changesRecommended" name="changesRecommended" rows="2" placeholder="What changes would they recommend?"></textarea>
+        </div>
+
+        <!-- Phone Number -->
+        <div class="field" id="field-phoneNumber">
+          <label for="phoneNumber">Phone Number</label>
+          <input type="tel" id="phoneNumber" name="phoneNumber" placeholder="Enter phone number..." autocomplete="tel" />
+        </div>
+
+        <!-- Email Address -->
+        <div class="field" id="field-email">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" name="email" placeholder="Enter email address..." autocomplete="email" />
+        </div>
+
+        <!-- Excitement Level -->
+        <div class="field" id="field-excitementLevel">
+          <label>Excitement Level</label>
+          <div class="emoji-group" role="group" aria-label="Excitement level">
+            <button type="button" class="emoji-btn" data-value="1" title="1/5" aria-label="Very sad">😞</button>
+            <button type="button" class="emoji-btn" data-value="2" title="2/5" aria-label="Sad">😕</button>
+            <button type="button" class="emoji-btn" data-value="3" title="3/5" aria-label="Neutral">😐</button>
+            <button type="button" class="emoji-btn" data-value="4" title="4/5" aria-label="Happy">🙂</button>
+            <button type="button" class="emoji-btn" data-value="5" title="5/5" aria-label="Excited">🤩</button>
+          </div>
+          <input type="hidden" id="excitementLevel" name="excitementLevel" value="5" />
+        </div>
+
+        <button type="submit" class="btn-submit" id="submit-btn">
+          <span class="btn-label">Submit Feedback</span>
+          <span class="btn-spinner" aria-hidden="true"></span>
+        </button>
+
+      </form>
+    </main>
+
+    <!-- Success -->
+    <div class="success-card" id="success-card" aria-live="polite">
+      <div class="success-icon">✅</div>
+      <h2>Thank you!</h2>
+      <p>Your feedback has been received. We really appreciate you taking the time.</p>
+      <button class="btn-reset" id="reset-btn">Submit another response</button>
+    </div>
+
+
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
