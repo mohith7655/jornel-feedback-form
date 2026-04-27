@@ -68,11 +68,13 @@ function updateProductLabels(name) {
   const demoEl       = document.getElementById('lbl-product-demo');
   const purchaseEl   = document.getElementById('lbl-product-purchase');
   const rateEl       = document.getElementById('lbl-product-rate');
+  const notifyEl     = document.getElementById('lbl-product-notify');
   const headerEl     = document.getElementById('header-product-name');
   const productField = document.getElementById('productNameDisplay');
   if (demoEl)       demoEl.textContent     = name;
   if (purchaseEl)   purchaseEl.textContent = name;
   if (rateEl)       rateEl.textContent     = name;
+  if (notifyEl)     notifyEl.textContent   = name;
   if (headerEl)     headerEl.textContent   = name;
   if (productField) productField.value     = name;
 }
@@ -183,6 +185,9 @@ function buildAnswers() {
     email:              document.getElementById('email').value.trim(),
     excitementLevel:    parseInt(document.getElementById('excitementLevel').value, 10) || 5,
     product_name:       productDisplayName !== 'Product' ? productDisplayName : null,
+    notify_on_launch:   document.getElementById('notifyOnLaunch').value === 'Yes' ? true
+                        : document.getElementById('notifyOnLaunch').value === 'No' ? false
+                        : null,
   };
 }
 
