@@ -1,8 +1,10 @@
 import { loadFormByToken, submitForm, uploadAttachment } from './src/services/formService.js';
 
-const urlToken = new URLSearchParams(window.location.search).get('token');
+const urlParams = new URLSearchParams(window.location.search);
+const urlToken = urlParams.get('token');
 let status = 'loading';
 let errorMsg = '';
+let productDisplayName = 'Product';
 
 const form        = document.getElementById('feedback-form');
 const formCard    = document.getElementById('form-card');
@@ -44,20 +46,35 @@ document.querySelectorAll('.pill-group').forEach((group) => {
 
 const purchaseReasonEl = document.getElementById('purchaseReason');
 
-const PURCHASE_PLACEHOLDERS = {
-  Yes:   'Main reason why you want to buy the GripCuff...',
-  Maybe: 'Main reason why you are hesitant to buy or not buy the GripCuff...',
-  No:    "Main reason why you don't want to buy the GripCuff...",
-};
+function getPurchasePlaceholder(intent) {
+  const name = productDisplayName;
+  if (intent === 'Yes')   return `Main reason why you want to buy the ${name}...`;
+  if (intent === 'Maybe') return `Main reason why you are hesitant to buy or not buy the ${name}...`;
+  if (intent === 'No')    return `Main reason why you don't want to buy the ${name}...`;
+  return '';
+}
 
 function updatePurchaseReason(intent) {
   if (intent) {
-    purchaseReasonEl.placeholder = PURCHASE_PLACEHOLDERS[intent] || '';
+    purchaseReasonEl.placeholder = getPurchasePlaceholder(intent);
     purchaseReasonEl.classList.remove('hidden');
   } else {
     purchaseReasonEl.classList.add('hidden');
     purchaseReasonEl.value = '';
   }
+}
+
+function updateProductLabels(name) {
+  const demoEl       = document.getElementById('lbl-product-demo');
+  const purchaseEl   = document.getElementById('lbl-product-purchase');
+  const rateEl       = document.getElementById('lbl-product-rate');
+  const headerEl     = document.getElementById('header-product-name');
+  const productField = document.getElementById('productNameDisplay');
+  if (demoEl)       demoEl.textContent     = name;
+  if (purchaseEl)   purchaseEl.textContent = name;
+  if (rateEl)       rateEl.textContent     = name;
+  if (headerEl)     headerEl.textContent   = name;
+  if (productField) productField.value     = name;
 }
 
 /* ── Star rating ────────────────────────────────────────────── */
@@ -165,10 +182,15 @@ function buildAnswers() {
     phoneNumber:        document.getElementById('phoneNumber').value.trim(),
     email:              document.getElementById('email').value.trim(),
     excitementLevel:    parseInt(document.getElementById('excitementLevel').value, 10) || 5,
+    product_name:       productDisplayName !== 'Product' ? productDisplayName : null,
   };
 }
 
 function showSuccess() {
+  const successProductEl = document.getElementById('success-product-name');
+  if (successProductEl && productDisplayName !== 'Product') {
+    successProductEl.textContent = productDisplayName;
+  }
   formCard.style.display = 'none';
   successCard.classList.add('visible');
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -227,22 +249,39 @@ function setStatus(nextStatus, message = '') {
   }
 }
 
+function prefillFromUrlParams(params) {
+  const pName    = params.get('name');
+  const pPhone   = params.get('phone');
+  const pEmail   = params.get('email');
+  const pProduct = params.get('product');
+
+  if (pName)    document.getElementById('personName').value  = pName;
+  if (pPhone)   document.getElementById('phoneNumber').value = pPhone;
+  if (pEmail)   document.getElementById('email').value       = pEmail;
+
+  if (pProduct) {
+    productDisplayName = pProduct;
+    updateProductLabels(pProduct);
+  }
+}
+
 function prefillFromToken(data) {
   if (!data) return;
 
-  if (data.person_name) {
-    document.getElementById('personName').value = data.person_name;
-  }
-  if (data.phone_number) {
-    document.getElementById('phoneNumber').value = data.phone_number;
-  }
-  if (data.email) {
-    document.getElementById('email').value = data.email;
-  }
+  const nameEl  = document.getElementById('personName');
+  const phoneEl = document.getElementById('phoneNumber');
+  const emailEl = document.getElementById('email');
+
+  if (data.person_name  && !nameEl.value)  nameEl.value  = data.person_name;
+  if (data.phone_number && !phoneEl.value) phoneEl.value = data.phone_number;
+  if (data.email        && !emailEl.value) emailEl.value = data.email;
 }
 
 async function initFormToken() {
   setStatus('loading', 'Loading form...');
+
+  // Prefill from URL params immediately (no async needed)
+  prefillFromUrlParams(urlParams);
 
   if (!urlToken) {
     setStatus('error', 'No form token found in the URL.');

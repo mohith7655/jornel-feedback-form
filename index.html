@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="GripCuff feedback form." />
-  <title>GripCuff — Feedback</title>
+  <meta name="description" content="Raw1 feedback form." />
+  <title>Raw1 — Feedback</title>
   <link rel="stylesheet" href="style.css" />
   <script type="importmap">
     {
@@ -19,8 +19,9 @@
 
     <header class="header">
       <div class="logo">
-        <span class="logo-text"><span class="logo-grip">Grip</span>Cuff Feedback</span>
+        <span class="logo-text"><span class="logo-grip">Raw</span>1</span>
       </div>
+      <p class="form-subtitle"><span id="header-product-name">Product</span> Feedback</p>
     </header>
 
     <main class="card" id="form-card">
@@ -61,9 +62,15 @@
           <input type="hidden" id="age" name="age" value="" />
         </div>
 
-        <!-- Tested GripCuff -->
+        <!-- Product Name (read-only) -->
+        <div class="field" id="field-productName">
+          <label for="productNameDisplay">Product Name</label>
+          <input type="text" id="productNameDisplay" name="productNameDisplay" readonly value="Product" class="field-readonly" />
+        </div>
+
+        <!-- Tested product -->
         <div class="field" id="field-demoProject">
-          <label>Tested GripCuff?</label>
+          <label>Tested <span id="lbl-product-demo">Product</span>?</label>
           <div class="pill-group" data-field="demoProject">
             <button type="button" class="pill" data-value="Yes">Yes</button>
             <button type="button" class="pill" data-value="No">No</button>
@@ -74,7 +81,7 @@
 
         <!-- Would you purchase -->
         <div class="field" id="field-purchaseIntent">
-          <label>Would you purchase the GripCuff?</label>
+          <label>Would you purchase the <span id="lbl-product-purchase">Product</span>?</label>
           <div class="pill-group" data-field="purchaseIntent">
             <button type="button" class="pill" data-value="Yes">Yes</button>
             <button type="button" class="pill" data-value="Maybe">Maybe</button>
@@ -90,9 +97,9 @@
           ></textarea>
         </div>
 
-        <!-- Rate GripCuff -->
+        <!-- Rate product -->
         <div class="field" id="field-rating">
-          <label>Rate GripCuff</label>
+          <label>Rate <span id="lbl-product-rate">Product</span></label>
           <div class="stars" role="group" aria-label="Star rating">
             <button type="button" class="star" data-value="1" aria-label="1 star">★</button>
             <button type="button" class="star" data-value="2" aria-label="2 stars">★</button>
@@ -105,20 +112,20 @@
 
         <!-- Features Liked -->
         <div class="field" id="field-featuresLiked">
-          <label for="featuresLiked">Features They Like</label>
-          <textarea id="featuresLiked" name="featuresLiked" rows="2" placeholder="What features did they like?"></textarea>
+          <label for="featuresLiked">Features You Like</label>
+          <textarea id="featuresLiked" name="featuresLiked" rows="2" placeholder="What features do you like?"></textarea>
         </div>
 
         <!-- Features Disliked -->
         <div class="field" id="field-featuresDisliked">
-          <label for="featuresDisliked">Features They Don't Like</label>
-          <textarea id="featuresDisliked" name="featuresDisliked" rows="2" placeholder="What features did they not like?"></textarea>
+          <label for="featuresDisliked">Features You Don't Like</label>
+          <textarea id="featuresDisliked" name="featuresDisliked" rows="2" placeholder="What features do you not like?"></textarea>
         </div>
 
         <!-- Changes Recommended -->
         <div class="field" id="field-changesRecommended">
           <label for="changesRecommended">Changes Recommended</label>
-          <textarea id="changesRecommended" name="changesRecommended" rows="2" placeholder="What changes would they recommend?"></textarea>
+          <textarea id="changesRecommended" name="changesRecommended" rows="2" placeholder="What changes would you recommend?"></textarea>
         </div>
 
         <!-- Phone Number -->
@@ -157,7 +164,7 @@
     <!-- Success -->
     <div class="success-card" id="success-card" aria-live="polite">
       <div class="success-icon">✅</div>
-      <h2>Thank you!</h2>
+      <h2>Thank you for testing <span id="success-product-name"><span class="logo-grip">Raw</span>1</span>!</h2>
       <p>Your feedback has been received. We really appreciate you taking the time.</p>
       <button class="btn-reset" id="reset-btn">Submit another response</button>
     </div>
